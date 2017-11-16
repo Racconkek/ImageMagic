@@ -1,36 +1,47 @@
 #!/bin/bash
 if [ "$1" = "-h" -o "$1" = "--help" ]; then
-    echo This build gif animation from your jpg picture
-    echo arguments: [angle] [time of gif animation] [jpg name] [gif name]
-    exit 0
+	echo This buil gif animation from your jpg picture
+	echo arguments: [angle] [time of gif animation] [jpg name] [gif name]
+	exit 0
 fi
 regv='^[0-9]+$'
-if ! [[ $1 =~ $regv ]]; then
-    echo Angle of gif animation is not a number
-    exit 0
+if ! [[ $1 =~ $regv ]]; then 
+	echo Angle of gif animation is not a number
+	exit 0
 fi
-if ! [[ $2 =~ $regv ]]; then
-    echo Time of gif animation is not a number
-    exit 0
+if ! [[ $2 =~ $regv ]]; then 
+	echo Time of gif animation is not a number
+	exit 0
 fi
-if [ -z $3 ]; then
-    echo You didnt enter name of pictire
-    exit 0
+if [ -z '$3' ]; then 
+	echo You didnt enter name of pictire
+	exit 0
 fi
-if [ ! -f $3.jpg ]; then
-    echo Picture $3.jpg doesnt exist
-    exit 0
+if [ ! -f "$3".jpg ]; then 
+	echo Picture "$3".jpg doesnt exist in this directory
+	echo Please wrap name of file in quotes
+	exit 0
 fi
 randomx=$RANDOM
+while [ -d temp$randomx ]; do
+randomx=$RANDOM
+done
+firstDir=`pwd`
+mkdir "$firstDir"/temp$randomx
+cp "$3".jpg "$firstDir"/temp$randomx
+cd "$firstDir"/temp$randomx
+
 countPicForOneSec=$(($(($2*100))/$1))
 for (( i=0; $i < $1; i++ )); do
-    nameOfTempPic=$(( $randomx+$i ))
-    convert $3.jpg -rotate $i temp$nameOfTempPic.jpg
-    composite -gravity center temp$nameOfTempPic.jpg $3.jpg temp$nameOfTempPic.jpg
+	convert "$3".jpg -rotate $i temp$i.jpg
+	composite -gravity center temp$i.jpg "$3".jpg temp$i.jpg
 done
-if [ -z $4 ]; then
-    convert -delay $countPicForOneSec temp*.jpg -loop 0 $3.gif
+if [ -z "$4" ]; then
+	convert -delay $countPicForOneSec temp*.jpg -loop 0 "$3".gif
+	cp "$3".gif "$firstDir"
 else
-    convert -delay $countPicForOneSec temp*.jpg -loop 0 $4.gif
+	convert -delay $countPicForOneSec temp*.jpg -loop 0 "$4".gif
+	cp "$4".gif "$firstDir"
 fi
-rm temp*.jpg
+cd "$firstDir"
+rm -rf temp$randomx
